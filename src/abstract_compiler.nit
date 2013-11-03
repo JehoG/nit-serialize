@@ -2088,7 +2088,9 @@ redef class AArrayExpr
 end
 
 redef class AStringFormExpr
-	redef fun expr(v) do return v.string_instance(self.value.as(not null))
+	redef fun expr(v) do 
+		return v.string_instance(self.value.as(not null))
+	end
 end
 
 redef class ASuperstringExpr
