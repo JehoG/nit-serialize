@@ -18,6 +18,7 @@ import modelize_property
 import parser_util
 import simple_misc_analysis
 import serialization
+intrude import literal
 
 redef class ToolContext
 	var serialization_phase: Phase = new SerializationPhase(self, [modelize_property_phase])
@@ -30,39 +31,6 @@ redef class APropdef
 	do
 		var v = new LiteralVisitor(toolcontext)
 		v.enter_visit(self)
-	end
-end
-
-private class LiteralVisitor
-	super Visitor
-
-	var toolcontext: ToolContext
-
-	init(toolcontext: ToolContext)
-	do
-		self.toolcontext = toolcontext
-	end
-
-	redef fun visit(n)
-	do
-		n.accept_literal(self)
-		n.visit_all(self)
-	end
-end
-
-redef class ANode
-	private fun accept_literal(v: LiteralVisitor) do end
-end
-
-redef class AStringFormExpr
-	# The value of the literal string once computed.
-	var value: nullable String
-	redef fun accept_literal(v)
-	do
-		var txt = self.n_string.text
-		var skip = 1
-		if txt[0] == txt[1] and txt.length >= 6 then skip = 3
-		self.value = txt.substring(skip, txt.length-(2*skip)).unescape_nit
 	end
 end
 
@@ -97,7 +65,7 @@ private class SerializationPhase
 		var serialize_mmethdef = new MMethodDef(mclassdef, new MMethod(mclassdef, "serialize", private_visibility), location)
 		serialize_mmethdef.msignature = new MSignature(new Array[MParameter], null)
 		var code = """
-			fun serialize do
+			fun serialize: SerializedObject do
 				var o = new SerializedObject
 		"""
 
@@ -114,7 +82,7 @@ private class SerializationPhase
 			end
 		end
 
-		code = code + "\nend"
+		code = code + "\nreturn o\nend"
 
 		var literal_visitor = new LiteralVisitor(toolcontext)
 		var serialize_propdef = toolcontext.parse_propdef(code)
