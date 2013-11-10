@@ -58,36 +58,40 @@ private class SerializationPhase
 			return
 		end
 
-		var mclassdef = npropdef.mclassdef.as(not null)
-		var mpropdefs = mclassdef.mpropdefs
+        var npropdefs = npropdef.n_propdefs
 
-		var location = npropdef.location
-		var serialize_mmethdef = new MMethodDef(mclassdef, new MMethod(mclassdef, "serialize", private_visibility), location)
-		serialize_mmethdef.msignature = new MSignature(new Array[MParameter], null)
 		var code = """
-			fun serialize: SerializedObject do
-				var o = new SerializedObject
-		"""
+fun serialize: SerializedObject 
+do
+    var o = new SerializedObject
+"""
 
-		for method in mpropdefs do
-			if method isa MAttributeDef then
-				var mtype = method.static_mtype.as(not null)
-				if mtype.to_s.has_all("nullable ") then
+		for method in npropdefs do
+			if method isa AAttrPropdef then
+				var ntype = method.n_type.as(not null)
+				if ntype.to_s.has_all("nullable ") then
 					modelbuilder.error(npropdef, "Syntax error: serializing a nullable attribut isn't supported yet.")
 					return
 				end
-
-				var name = method.mproperty.name.substring_from(1)
-				code = code + "o.add_element(\"{name}\", {name})\n"
+                
+                var name
+                if method.n_id is null then 
+                    name = method.n_id2.text
+                else 
+                    name = method.n_id.text
+                end
+#				var name = method.mproperty.name.substring_from(1)
+				code = code + "    o.add_element(\"{name}\", {name})\n"
 			end
 		end
 
-		code = code + "\nreturn o\nend"
+        code = code + "\n    return o\nend"
+        
+        # Create method Node and add it to the AST
+        var nnewmeth = toolcontext.parse_propdef(code)
+        npropdefs.push(nnewmeth)
+        npropdefs = npropdef.n_propdefs
 
-		var literal_visitor = new LiteralVisitor(toolcontext)
-		var serialize_propdef = toolcontext.parse_propdef(code)
-		serialize_propdef.do_literal(toolcontext)
-		associate_propdef(serialize_mmethdef, serialize_propdef)
 	end
 
 	# Detach `n` from its original AST and attach it to `m` (and its related AST)
