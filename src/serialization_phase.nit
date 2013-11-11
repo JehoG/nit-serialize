@@ -81,7 +81,6 @@ do
         print code
         print nnewmeth
         print nnewmeth.collect_tokens_by_text(code)
-        print nnewmeth.n_propdefs
         npropdefs.push(nnewmeth)
 
         print npropdefs
