@@ -9,5 +9,5 @@ class Foobar
 end
 
 var a = new Foobar("test")
-#a.serialize
+a.serialize
 print a.attr_a
