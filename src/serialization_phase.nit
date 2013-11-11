@@ -89,31 +89,4 @@ do
         #        npropdefs = npropdef.n_propdefs
 
 	end
-
-	# Detach `n` from its original AST and attach it to `m` (and its related AST)
-	# `n` must not be already attached to an existing model entity
-	# `m` must not be already attached to an existing AST node
-	fun associate_propdef(m: MPropDef, n: APropdef)
-	do
-		# FIXME: the model-AST relations **must** be rationalized:
-		# * 1- fragility: the risk of inconsistencies is too hight
-		# * 2- complexity: there is too much paths to access the same things
-
-		# Easy attach
-		assert n.mpropdef == null
-		n.mpropdef = m
-
-		# Required to so that look-for implementation works
-		assert not toolcontext.modelbuilder.mpropdef2npropdef.has_key(m)
-		toolcontext.modelbuilder.mpropdef2npropdef[m] = n
-
-		var mclassdef = m.mclassdef
-		var nclassdef = toolcontext.modelbuilder.mclassdef2nclassdef[mclassdef]
-		# Sanity checks
-		assert nclassdef.mclassdef == mclassdef
-
-		# Required so that propdef are visited in visitors
-		if not nclassdef.n_propdefs.has(n) then nclassdef.n_propdefs.add(n)
-	end
-
 end
