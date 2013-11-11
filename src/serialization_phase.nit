@@ -14,13 +14,8 @@
 
 module serialization_phase
 
-import modelize_property
-import typing
-import transform
-import auto_super_init
+import phase
 import parser_util
-import simple_misc_analysis
-import serialization
 
 redef class ToolContext
 	var serialization_phase: Phase = new SerializationPhase(self, [auto_super_init_phase, typing_phase])
