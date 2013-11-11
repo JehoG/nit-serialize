@@ -15,24 +15,17 @@
 module serialization_phase
 
 import modelize_property
+import typing
+import transform
+import auto_super_init
 import parser_util
 import simple_misc_analysis
 import serialization
-intrude import literal
 
 redef class ToolContext
-	var serialization_phase: Phase = new SerializationPhase(self, [modelize_property_phase])
+	var serialization_phase: Phase = new SerializationPhase(self, [auto_super_init_phase, typing_phase])
 end
 
-redef class APropdef
-	# Visit the module to compute the real value of the literal-related node of the AST.
-	# Warnings and errors are displayed on the toolcontext.
-	fun do_literal(toolcontext: ToolContext)
-	do
-		var v = new LiteralVisitor(toolcontext)
-		v.enter_visit(self)
-	end
-end
 
 private class SerializationPhase
 	super Phase
@@ -43,7 +36,7 @@ private class SerializationPhase
 		# But there is no simple way to express this
 		# So, for the moment, I just looked at the linearization and see what phase is after `modelize_property_phase`
 		# And inserted before it
-		toolcontext.phases.add_edge(toolcontext.simple_misc_analysis_phase, self)
+        #   		toolcontext.phases.add_edge(toolcontext.transform_phase, self)
     end
 
 	redef fun process_annotated_node(npropdef, nat)
@@ -53,11 +46,11 @@ private class SerializationPhase
 
 		var modelbuilder = toolcontext.modelbuilder
 
+        print "fuck"
 		if not npropdef isa AStdClassdef then
 			modelbuilder.error(npropdef, "Syntax error: only a concrete class can be serialized.")
 			return
 		end
-
         var npropdefs = npropdef.n_propdefs
 
 		var code = """
@@ -88,9 +81,16 @@ do
         code = code + "\n    return o\nend"
         
         # Create method Node and add it to the AST
-        var nnewmeth = toolcontext.parse_propdef(code)
+        var nnewmeth: APropdef = toolcontext.parse_propdef(code)
+        print code
+        print nnewmeth
+        print nnewmeth.collect_tokens_by_text(code)
+        print nnewmeth.n_propdefs
         npropdefs.push(nnewmeth)
-        npropdefs = npropdef.n_propdefs
+
+        print npropdefs
+        
+        #        npropdefs = npropdef.n_propdefs
 
 	end
 
