@@ -52,6 +52,7 @@ private class SerializationPhase
 fun serialize: SerializedObject 
 do
     var o = new SerializedObject
+	print "hello from generated method"
 """
 
 		for method in npropdefs do
