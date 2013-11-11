@@ -18,7 +18,7 @@ import phase
 import parser_util
 
 redef class ToolContext
-	var serialization_phase: Phase = new SerializationPhase(self, [auto_super_init_phase, typing_phase])
+	var serialization_phase: Phase = new SerializationPhase(self, null) #[auto_super_init_phase, typing_phase])
 end
 
 
