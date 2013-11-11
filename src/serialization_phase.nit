@@ -39,11 +39,11 @@ private class SerializationPhase
 		# Skip if we are not interested
 		if nat.n_atid.n_id.text != "serialized" then return
 
-		var modelbuilder = toolcontext.modelbuilder
+		#var modelbuilder = toolcontext.modelbuilder
 
         print "fuck"
 		if not npropdef isa AStdClassdef then
-			modelbuilder.error(npropdef, "Syntax error: only a concrete class can be serialized.")
+			toolcontext.error(npropdef.location, "Syntax error: only a concrete class can be serialized.")
 			return
 		end
         var npropdefs = npropdef.n_propdefs
@@ -58,7 +58,7 @@ do
 			if method isa AAttrPropdef then
 				var ntype = method.n_type.as(not null)
 				if ntype.to_s.has_all("nullable ") then
-					modelbuilder.error(npropdef, "Syntax error: serializing a nullable attribut isn't supported yet.")
+					toolcontext.error(npropdef.location, "Syntax error: serializing a nullable attribut isn't supported yet.")
 					return
 				end
                 
