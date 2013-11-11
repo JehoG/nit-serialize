@@ -18,11 +18,10 @@ module transform
 
 import astbuilder
 import auto_super_init
-import serialization_phase
 import astvalidation
 
 redef class ToolContext
-	var transform_phase: Phase = new TransformPhase(self, [serialization_phase])
+	var transform_phase: Phase = new TransformPhase(self, [auto_super_init_phase, typing_phase])
 end
 
 private class TransformPhase
